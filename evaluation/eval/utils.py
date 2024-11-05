@@ -7,9 +7,36 @@ import os
 from importlib import import_module
 from transformers import StoppingCriteria
 
-from open_instruct.finetune import encode_with_prompt_completion_format
 from eval.dispatch_openai_requests import dispatch_openai_chat_requesets, dispatch_openai_prompt_requesets
 
+def encode_with_prompt_completion_format(example, tokenizer, max_seq_length):
+    '''
+    Original implementation of the function: https://github.com/allenai/open-instruct/blob/9ebcb582cfc243a6dab75b4302fa432784db26c2/open_instruct/finetune.py#L238
+
+    Here we assume each example has 'prompt' and 'completion' fields.
+    We concatenate prompt and completion and tokenize them together because otherwise prompt will be padded/trancated 
+    and it doesn't make sense to follow directly with the completion.
+    '''
+    # if prompt doesn't end with space and completion doesn't start with space, add space
+    if not example['prompt'].endswith((' ', '\n', '\t')) and not example['completion'].startswith((' ', '\n', '\t')):
+        example_text = example['prompt'] + ' ' + example['completion']
+    else:
+        example_text = example['prompt'] + example['completion']
+    example_text = example_text + tokenizer.eos_token
+    tokenized_example = tokenizer(
+        example_text, return_tensors='pt', max_length=max_seq_length, truncation=True)
+    input_ids = tokenized_example.input_ids
+    labels = input_ids.clone()
+    tokenized_prompt = tokenizer(
+        example['prompt'], return_tensors='pt', max_length=max_seq_length, truncation=True)
+    # mask the prompt part for avoiding loss
+    labels[:, :tokenized_prompt.input_ids.shape[1]] = -100
+    attention_mask = torch.ones_like(input_ids)
+    return {
+        'input_ids': input_ids.flatten(),
+        'labels': labels.flatten(),
+        'attention_mask': attention_mask.flatten(),
+    }
 
 class KeyWordsCriteria(StoppingCriteria):
     def __init__(self, stop_id_sequences):
@@ -200,12 +227,14 @@ def load_hf_lm_and_tokenizer(
     from transformers import AutoModelForCausalLM, AutoTokenizer, OPTForCausalLM, GPTNeoXForCausalLM
     
     is_peft = "lora" in model_name_or_path 
+    print(f"raw model_name_or_path: {model_name_or_path}")
     from peft import PeftConfig, PeftModel
     
     if is_peft:
-        peft_config = PeftConfig.from_pretrained(model_name_or_path)
+        # peft_config = PeftConfig.from_pretrained(model_name_or_path)
         peft_dir = model_name_or_path
-        model_name_or_path = peft_config.base_model_name_or_path
+        # model_name_or_path = peft_config.base_model_name_or_path
+        # print(f"shortened model_name_or_path: {model_name_or_path}")
         
     if gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
@@ -220,10 +249,13 @@ def load_hf_lm_and_tokenizer(
             load_in_8bit=True
         )
     else:
+        print('to be loaded from ', model_name_or_path)
+        pretrained_model_name_or_path = model_name_or_path
+
         if device_map:
-            model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map=device_map, torch_dtype=None)
+            model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path, device_map=device_map, torch_dtype=None)
         else:
-            model = AutoModelForCausalLM.from_pretrained(model_name_or_path, torch_dtype=torch_dtype)
+            model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path, torch_dtype=torch_dtype)
             if torch.cuda.is_available():
                 model = model.cuda()
         
