@@ -1,7 +1,7 @@
 CKPT=92
 
 TRAINING_DATA_NAME=dolly
-TRAINING_DATA_FILE=data/train/processed/dolly/train_dolly_data.json # when changing data name, change the data path accordingly
+TRAINING_DATA_FILE=data/train/processed/dolly/train_dolly_data.jsonl # when changing data name, change the data path accordingly
 GRADIENT_TYPE="adam"
 MODEL_LOG="TinyLlama/TinyLlama-1.1B-Chat-v1.0-p0.1-lora-seed3"
 MODEL_PATH=../out/${MODEL_LOG}/checkpoint-${CKPT}
