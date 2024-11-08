@@ -4,3 +4,4 @@ less.egg-info
 wandb/
 selected_data/
 evaluation/result/
+*.pt
