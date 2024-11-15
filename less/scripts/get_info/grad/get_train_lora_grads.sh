@@ -10,7 +10,7 @@ if [[ ! -d $output_path ]]; then
     mkdir -p $output_path
 fi
 
-CUDA_VISIBLE_DEVICES=1 python3 -m less.data_selection.get_info \
+python3 -m less.data_selection.get_info \
 --train_file $train_file \
 --info_type grads \
 --model_path $model \
