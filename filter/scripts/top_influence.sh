@@ -1,11 +1,11 @@
 TRAIN_FILE_NAMES="dolly"
 TARGET_TASK_NAMES="mmlu"
 
-SELECTED_DATA_OUTPUT_PATH="selected_data/filtered"
+SELECTED_DATA_OUTPUT_PATH="selected_data/filtered/"
 
 CUDA_VISIBLE_DEVICES=1 python3 -m less.data_selection.write_selected_data \
 --target_task_names ${TARGET_TASK_NAMES} \
 --train_file_names ${TRAIN_FILE_NAMES} \
---train_files data/train/processed/dolly/filtered_train_dolly_data.jsonl \
+--train_files data/train/processed/dolly/train_dolly_data.jsonl \
 --output_path $SELECTED_DATA_OUTPUT_PATH \
---percentage 0.1
+--percentage 0.35
