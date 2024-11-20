@@ -11,7 +11,7 @@ GPU=${1:-0,1}
 for CKPT in 23 46 70 92; do
     echo "Processing checkpoint ${CKPT}"
 
-    MODEL_PATH=../out/${MODEL_LOG}/checkpoint-${CKPT}
-    OUTPUT_PATH=../grads/${MODEL_LOG}/${TASK}-ckpt${CKPT}-sgd # for validation data, we always use sgd
+    MODEL_PATH=~/out/${MODEL_LOG}/checkpoint-${CKPT}
+    OUTPUT_PATH=~/grads/${MODEL_LOG}/${TASK}-ckpt${CKPT}-sgd # for validation data, we always use sgd
     CUDA_VISIBLE_DEVICES=$GPU ./less/scripts/get_info/grad/get_eval_lora_grads.sh "$TASK" "$DATA_DIR" "$MODEL_PATH" $OUTPUT_PATH "$DIMS"
 done
