@@ -1,10 +1,17 @@
 # Updated Instruction of Efficient Data Selection Pipelines for LLM Tuning
 
-<!-- # LESS: Selecting Influential Data for Targeted Instruction Tuning -->
+## Framework
+![Data Selection Pipeline](framework.png)
 
-This repo contains the code for our ICML 2024  paper [LESS: Selecting Influential Data for Targeted Instruction Tuning](https://arxiv.org/abs/2402.04333). In this work, we propose a data selection method to select influential data to induce a target capability.
+## Next Steps
+
+- [ ] Better gradient level classifier / influence score predictor. Try more training epochs / data and so on. 
+
+- [ ] Reproduce LESS experiment results. To load model and all datasets into our total GPU memory of ~ 50GB, model quantization *(In `less/train/train.py`, around lines 75-76, when creating the model, add a parameter  `load_in_8bit=True`)* and gradient checkpointing may need to be enabled *(In `less/scripts/train/base_training_args.sh`, simply add another parameter `--gradient_checkpointing`. The library version of Accelerate may need to be over 0.28.0, but other functions, like loading data or distributed training can be affected.)*
+
 
 ## 🔗 Quick Links
+This repo contains the code for an ICML 2024  paper [LESS: Selecting Influential Data for Targeted Instruction Tuning](https://arxiv.org/abs/2402.04333). In this work, we propose a data selection method to select influential data to induce a target capability.
 - [LESS: Selecting Influential Data for Targeted Instruction Tuning](#less-selecting-influential-data-for-targeted-instruction-tuning)
   - [🔗 Quick Links](#-quick-links)
   - [Install Requirements](#install-requirements)
@@ -46,9 +53,12 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 
 ## Data Selection Pipeline
 
+**Since several datasets and checkpoints may be needed, I created new bash files to automate the running process.**
+
 ### Step 1: Warmup training in [warmup.sh](warmup.sh)
 To enhance downstream performance from data selection, it's crucial to start with a warmup training step. This involves selecting a small portion of your entire dataset to train using the LoRA method. Follow these steps for effective warmup training:
 
+Original Bash:
 ```bash 
 DATA_DIR=../data
 MODEL_PATH=meta-llama/Llama-2-7b-hf
@@ -62,6 +72,7 @@ JOB_NAME=llama2-7b-p${PERCENTAGE}-lora-seed${DATA_SEED}
 ### Step 2: Building the gradient datastore in [train_grad.sh](train_grad.sh)
 Once the initial warmup training stage is completed, we will collect gradients for the entire training dataset. For each checkpoint, our goal is to obtain the gradients of all the training data that we would like to select from. An example script is shown below.
 
+Original Bash
 ```bash
 CKPT=105
 
@@ -80,6 +91,7 @@ Ideally, you would aim to create a datastore that encompasses a gradient of all 
 
 To select data for a particular downstream task, it's necessary to first prepare data specific to that task, using the same instruction-tuning prompt format as was employed during training. We have set up data loading modules for three evaluation datasets featured in our work: BBH, TydiQA, and MMLU. If you're interested in data selection for additional tasks, you can expand the [`less/data_selection/get_validation_dataset.py`](less/data_selection/get_validation_dataset.py) script to accommodate those tasks. Similar to obtaining gradients for training data, run the following script. The primary difference is that this process will yield SGD gradients for the validation data, following the formulation of the influence estimation. 
 
+Original Bash
 ```bash
 
 CKPT=105
