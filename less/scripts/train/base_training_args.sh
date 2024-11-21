@@ -2,7 +2,7 @@
 export PATH=~/miniconda3/envs/venv/bin/:$PATH
 
 ID=$RANDOM
-export header="CUDA_VISIBLE_DEVICES=1 LOCAL_RANK=1 torchrun --nproc_per_node 1 --nnodes 1 \
+export header="torchrun --nproc_per_node 1 --nnodes 1 \
 --rdzv-id=$ID --rdzv_backend c10d \
 -m less.train.train"
 

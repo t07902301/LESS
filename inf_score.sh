@@ -1,11 +1,11 @@
 DIM=8192 # decide which dimension to use
 MODEL_LOG="TinyLlama/TinyLlama-1.1B-Chat-v1.0-p0.1-lora-seed3"
 TRAIN_FILE_NAMES="dolly"
-CKPTS="92" # checkpoing index
-CHECKPOINT_WEIGHTS="7.7030e-06" # average lr of the epoch
+CKPTS="23 46 70 92" # checkpoing index
+CHECKPOINT_WEIGHTS="1.707865168539327e-05 1.2808988764044946e-05 7.528089887640449e-06 2.4719101123595505e-06" # average lr of the epoch
 TARGET_TASK_NAMES="mmlu"
-VALIDATION_GRADIENT_PATH=../grads/${MODEL_LOG}/${TARGET_TASK_NAMES}-ckpt${CKPTS}-sgd/dim${DIM}
-GRADIENT_PATH=../grads/${MODEL_LOG}/${TRAIN_FILE_NAMES}-ckpt${CKPTS}-adam/dim${DIM}
+VALIDATION_GRADIENT_PATH=~/grads/${MODEL_LOG}/${TARGET_TASK_NAMES}-ckpt{}-sgd/dim${DIM}
+GRADIENT_PATH=~/grads/${MODEL_LOG}/${TRAIN_FILE_NAMES}-ckpt{}-adam/dim${DIM}
 
 SELECTED_DATA_OUTPUT_PATH="selected_data"
 
