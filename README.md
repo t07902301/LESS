@@ -10,30 +10,15 @@ Implementation Notes
 
 2. The influence score of a given data instance w.r.t a target task can be defined as the average/maximum/minimum cosine similarity between this sample and a set of reference points from the target task. So in [data_generation.ipynb](filter/data_generation.ipynb), there are three ways of aggregating cosine similarity as the final influence score of an input w.r.t reference points.
 
-## How to Run the New Pipeline
-
-1. run [split_dataset.ipynb](split_dataset.ipynb) to generate data selection pool `train_dolly_data.jsonl` and training points `val_dolly_data.jsonl` for classification/regression tasks. 
-2. use [warm_up.sh](warm_up.sh) to obtain checkpoints of LORA training on part of the data selection pool.
-3. run [fake_val_grad.sh](filter/scripts/fake_val_grad.sh) to calculate adam gradidents of sampled training points `sampled_val_dolly_data.jsonl`, and [val_grad.sh](val_grad.sh) to get SGD gradients of reference points.
-4. use [data_generation.ipynb](filter/data_generation.ipynb) to obtain influence scores of training points and label data for classification tasks. 
-5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
-6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. No need to run these steps if the regression model is used.
-7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
-
-## Next Steps
-
-- [ ] Better gradient level classifier / influence score predictor. Try more training epochs / data and so on. 
-
-- [ ] Reproduce LESS experiment results. To load model and all datasets into our total GPU memory of ~ 50GB, model quantization *(In `less/train/train.py`, around lines 75-76, when creating the model, add a parameter  `load_in_8bit=True`)* and gradient checkpointing may need to be enabled *(In `less/scripts/train/base_training_args.sh`, simply add another parameter `--gradient_checkpointing`. The library version of Accelerate may need to be over 0.28.0, but other functions, like loading data or distributed training can be affected.)*
-
-
 ## 🔗 Quick Links
 This repo contains the code for an ICML 2024  paper [LESS: Selecting Influential Data for Targeted Instruction Tuning](https://arxiv.org/abs/2402.04333). In this work, we propose a data selection method to select influential data to induce a target capability.
 - [LESS: Selecting Influential Data for Targeted Instruction Tuning](#less-selecting-influential-data-for-targeted-instruction-tuning)
   - [🔗 Quick Links](#-quick-links)
   - [Install Requirements](#install-requirements)
   - [Data Preparation](#data-preparation)
-  - [Data Selection Pipeline](#data-selection-pipeline)
+  - [How to Run New Pipeline](#how-to-run-the-new-pipeline)
+  - [Next Steps](#next-steps)
+  - [LESS Selection Pipeline](#less-pipeline)
     - [Step 1: Warmup training](#step-1-warmup-training)
     - [Step 2: Building the gradient datastore](#step-2-building-the-gradient-datastore)
     - [Step 3: Selecting data for a task](#step-3-selecting-data-for-a-task)
@@ -68,7 +53,23 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 1. create a folder in the data disk by `mkdir /data/yourusername`
 2. create a data folder in the user's home directory by `mkdir ~/my_project_data`, and link this folder with the data disk one by `ln -s /data/yourusername/my_project_data ~/my_project_data`
 
-## Data Selection Pipeline
+## How to Run the New Pipeline
+
+1. run [split_dataset.ipynb](split_dataset.ipynb) to generate data selection pool `train_dolly_data.jsonl` and training points `val_dolly_data.jsonl` for classification/regression tasks. 
+2. use [warm_up.sh](warm_up.sh) to obtain checkpoints of LORA training on part of the data selection pool.
+3. run [fake_val_grad.sh](filter/scripts/fake_val_grad.sh) to calculate adam gradidents of sampled training points `sampled_val_dolly_data.jsonl`, and [val_grad.sh](val_grad.sh) to get SGD gradients of reference points.
+4. use [data_generation.ipynb](filter/data_generation.ipynb) to obtain influence scores of training points and label data for classification tasks. 
+5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
+6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. No need to run these steps if the regression model is used.
+7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
+
+## Next Steps
+
+- [ ] Better gradient level classifier / influence score predictor. Try more training epochs / data and so on. 
+
+- [ ] Reproduce LESS experiment results. To load model and all datasets into our total GPU memory of ~ 50GB, model quantization *(In `less/train/train.py`, around lines 75-76, when creating the model, add a parameter  `load_in_8bit=True`)* and gradient checkpointing may need to be enabled *(In `less/scripts/train/base_training_args.sh`, simply add another parameter `--gradient_checkpointing`. The library version of Accelerate may need to be over 0.28.0, but other functions, like loading data or distributed training can be affected.)*
+
+## LESS Pipeline
 
 **Since several datasets and checkpoints are needed for either LESS experiment reproduction or running new pipelines, I created new bash files to make the process more convenient.**
 
