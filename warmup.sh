@@ -4,6 +4,10 @@ PERCENTAGE=0.1 # percentage of the full data to train, you can specify the train
 DATA_SEED=3
 JOB_NAME=${MODEL_PATH}-p${PERCENTAGE}-lora-seed${DATA_SEED}
 
+GPU_ID=${1:-all}
+export CUDA_VISIBLE_DEVICES=$GPU_ID
+echo "Using GPU $CUDA_VISIBLE_DEVICES"
+
 ./less/scripts/train/warmup_lora_train.sh "$train_files" "$MODEL_PATH" "$PERCENTAGE" "$DATA_SEED" "$JOB_NAME"
 
 # DATA_DIR=data

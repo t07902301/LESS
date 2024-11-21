@@ -8,7 +8,7 @@ percentage=$3
 data_seed=$4
 job_name=$5
 
-output_dir=../out/${job_name}
+output_dir=~/out/${job_name}
 if [[ ! -d $output_dir ]]; then
     mkdir -p $output_dir
 fi
