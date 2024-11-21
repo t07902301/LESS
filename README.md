@@ -169,7 +169,10 @@ Note that you can also perform full-parameter finetuning by removing the lora tr
 Please follow the instructions in the [evaluation](evaluation/README.md) folder to evaluate the performance of the model trained on the selected data.
 
 ## Bugs or Questions?
-If you have any questions related to the code or the paper, feel free to email Mengzhou (mengzhou@princeton.edu). If you encounter any problems when using the code, or want to report a bug, you can open an issue. Please try to specify the problem with details so we can help you better and quicker!
+
+new pipeline builder: e-well@outlook.com
+original: mengzhou@princeton.edu and LESS repo
+<!-- If you have any questions related to the code or the paper, feel free to email Mengzhou (mengzhou@princeton.edu). If you encounter any problems when using the code, or want to report a bug, you can open an issue. Please try to specify the problem with details so we can help you better and quicker! -->
 
 ## Citation
 Please cite our paper if you find the repo helpful in your work:
