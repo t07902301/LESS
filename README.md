@@ -1,4 +1,6 @@
-# LESS: Selecting Influential Data for Targeted Instruction Tuning
+# Updated Instruction of Efficient Data Selection Pipelines for LLM Tuning
+
+<!-- # LESS: Selecting Influential Data for Targeted Instruction Tuning -->
 
 This repo contains the code for our ICML 2024  paper [LESS: Selecting Influential Data for Targeted Instruction Tuning](https://arxiv.org/abs/2402.04333). In this work, we propose a data selection method to select influential data to induce a target capability.
 
@@ -38,9 +40,13 @@ pip install -e .
 ## Data Preparation
 We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readme-ov-file#dataset-preparation) repo to prepare four instruction tuning datasets. In our project, we utilize a combination of four training datasets: Flan v2, COT, Dolly, and Open Assistant. For the purposes of evaluation, we employ three additional datasets: MMLU, Tydiqa, and BBH. A processed version of these files are available [here](https://huggingface.co/datasets/princeton-nlp/less_data).
 
+**To use data disk, please follow these steps**
+1. create a folder in the data disk by `mkdir /data/yourusername`
+2. create a data folder in the user's home directory by `mkdir ~/my_project_data`, and link this folder with the data disk one by `ln -s /data/yourusername/my_project_data ~/my_project_data`
+
 ## Data Selection Pipeline
 
-### Step 1: Warmup training
+### Step 1: Warmup training in [warmup.sh](warmup.sh)
 To enhance downstream performance from data selection, it's crucial to start with a warmup training step. This involves selecting a small portion of your entire dataset to train using the LoRA method. Follow these steps for effective warmup training:
 
 ```bash 
@@ -53,7 +59,7 @@ JOB_NAME=llama2-7b-p${PERCENTAGE}-lora-seed${DATA_SEED}
 ./less/scripts/train/warmup_lora_train.sh "$DATA_DIR" "$MODEL_PATH" "$PERCENTAGE" "$DATA_SEED" "$JOB_NAME"
 ```
 
-### Step 2: Building the gradient datastore
+### Step 2: Building the gradient datastore in [train_grad.sh](train_grad.sh)
 Once the initial warmup training stage is completed, we will collect gradients for the entire training dataset. For each checkpoint, our goal is to obtain the gradients of all the training data that we would like to select from. An example script is shown below.
 
 ```bash
@@ -70,7 +76,8 @@ DIMS="8192"
 ```
 Ideally, you would aim to create a datastore that encompasses a gradient of all the checkpoints and training data from which you wish to choose. 
 
-### Step 3: Selecting data for a task
+### Step 3: Compute Validation Gradients [val_grad.sh](val_grad.sh), Obtain Influenc Score in [inf_score.sh](inf_score.sh) and then Select Data for a Task in [top_influence.sh](top_influence.sh)
+
 To select data for a particular downstream task, it's necessary to first prepare data specific to that task, using the same instruction-tuning prompt format as was employed during training. We have set up data loading modules for three evaluation datasets featured in our work: BBH, TydiQA, and MMLU. If you're interested in data selection for additional tasks, you can expand the [`less/data_selection/get_validation_dataset.py`](less/data_selection/get_validation_dataset.py) script to accommodate those tasks. Similar to obtaining gradients for training data, run the following script. The primary difference is that this process will yield SGD gradients for the validation data, following the formulation of the influence estimation. 
 
 ```bash
@@ -111,7 +118,7 @@ python3 -m less.data_selection.write_selected_data \
 --percentage 0.05
 ```
 
-### Step 4: Train with your selected data
+### Step 4: Train with your selected data in [tune.sh](tune.sh)
 After selecting the data, you can use the following script to train the model with the selected data. 
 
 ```bash 
@@ -126,6 +133,9 @@ JOB_NAME=llama2-7b-less-p${PERCENTAGE}-lora
 Note that you can also perform full-parameter finetuning by removing the lora training parameters. 
 
 ## Evaluation
+
+**I haven't figured out how to run the following scripts, so I created a simple one in [raw_eval.sh](evaluation/raw_eval.sh) where arguments need to be modified.**
+
 Please follow the instructions in the [evaluation](evaluation/README.md) folder to evaluate the performance of the model trained on the selected data.
 
 ## Bugs or Questions?
