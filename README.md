@@ -3,6 +3,23 @@
 ## Framework
 ![Data Selection Pipeline](framework.png)
 
+Implementation Notes 
+1. Since the original valiation dataset for each task (dolly, flan-v2) is fairly small, I used them as reference points, and took part of the training dataset as training points for classification or regression. The rest of training data is seen as the data selection pool.
+
+   For example, `dolly` has 15K samples, and I chose 7.5K as training points `val_dolly_data.jsonl` for classification or regression models, while the other 7.5K as the data selection pool `train_dolly_data.jsonl`. 
+
+2. The influence score of a given data instance w.r.t a target task can be defined as the average/maximum/minimum cosine similarity between this sample and a set of reference points from the target task. So in [data_generation.ipynb](filter/data_generation.ipynb), there are three ways of aggregating cosine similarity as the final influence score of an input w.r.t reference points.
+
+## How to Run the New Pipeline
+
+1. run [split_dataset.ipynb](split_dataset.ipynb) to generate data selection pool `train_dolly_data.jsonl` and training points `val_dolly_data.jsonl` for classification/regression tasks. 
+2. use [warm_up.sh](warm_up.sh) to obtain checkpoints of LORA training on part of the data selection pool.
+3. run [fake_val_grad.sh](filter/scripts/fake_val_grad.sh) to calculate adam gradidents of sampled training points `sampled_val_dolly_data.jsonl`, and [val_grad.sh](val_grad.sh) to get SGD gradients of reference points.
+4. use [data_generation.ipynb](filter/data_generation.ipynb) to obtain influence scores of training points and label data for classification tasks. 
+5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
+6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. No need to run these steps if the regression model is used.
+7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
+
 ## Next Steps
 
 - [ ] Better gradient level classifier / influence score predictor. Try more training epochs / data and so on. 
@@ -53,7 +70,7 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 
 ## Data Selection Pipeline
 
-**Since several datasets and checkpoints may be needed, I created new bash files to automate the running process.**
+**Since several datasets and checkpoints are needed for either LESS experiment reproduction or running new pipelines, I created new bash files to make the process more convenient.**
 
 ### Step 1: Warmup training in [warmup.sh](warmup.sh)
 To enhance downstream performance from data selection, it's crucial to start with a warmup training step. This involves selecting a small portion of your entire dataset to train using the LoRA method. Follow these steps for effective warmup training:
