@@ -62,7 +62,7 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
 6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. 
   
-  However, there's no need to run these steps if the regression model is used to get promising data selection candidates. 
+    However, there's no need to run these steps if the regression model is used to get promising data selection candidates. 
 
 7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
 
