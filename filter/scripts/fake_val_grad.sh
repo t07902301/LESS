@@ -3,7 +3,7 @@ TRAINING_DATA_NAME=dolly
 TRAINING_DATA_FILE=~/data/llm/train/processed/dolly/sampled_val_dolly_data.jsonl # when changing data name, change the data path accordingly
 GRADIENT_TYPE="adam"
 MODEL_LOG="TinyLlama/TinyLlama-1.1B-Chat-v1.0-p0.1-lora-seed3"
-DIMS="4096"
+DIMS="4096" # Dimension of Projected Gradient Vectors
 
 START_TIME=$(date +%s)
 GPU_ID=${1:-all}

@@ -3,7 +3,7 @@
 ## Framework
 ![Data Selection Pipeline](framework.png)
 
-Implementation Notes 
+**Implementation Notes**
 1. Since the original valiation dataset for each task (dolly, flan-v2) is fairly small, I used them as reference points, and took part of the training dataset as training points for classification or regression. The rest of training data is seen as the data selection pool.
 
    For example, `dolly` has 15K samples, and I chose 7.5K as training points `val_dolly_data.jsonl` for classification or regression models, while the other 7.5K as the data selection pool `train_dolly_data.jsonl`. 
@@ -60,8 +60,25 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 3. run [fake_val_grad.sh](filter/scripts/fake_val_grad.sh) to calculate adam gradidents of sampled training points `sampled_val_dolly_data.jsonl`, and [val_grad.sh](val_grad.sh) to get SGD gradients of reference points. The reason to sample training points is only for testing the code and speed up code updates. 
 4. use [data_generation.ipynb](filter/data_generation.ipynb) to obtain influence scores of training points and label data for classification tasks. 
 5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
-6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. No need to run these steps if the regression model is used.
+6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. 
+  
+  However, there's no need to run these steps if the regression model is used to get promising data selection candidates. 
+
 7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
+
+## Current Results
+
+Use 3K training points and 280 reference points, and fix 0 as the random seed when creating dataloaders to train classification / regression models. 
+
+Avg/Max/Min columns means if we take the average/max/min cosine similarities between a training point and 280 reference points as the influence score of this point about a target task.  
+
+Projected Gradient Vector Dimension = 4096, defined in [fake_val_grad.sh](filter/scripts/fake_val_grad.sh)
+
+| Metrics| Avg | Max | Min |
+|----------|----------|----------|----------|
+|   Classification Accuracy  |   41%   |   38%   |   42%   |
+|   Regression R2 Score  |   -2.09   |   -14   |   -0.029   |
+
 
 ## Next Steps
 
