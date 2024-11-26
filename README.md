@@ -52,6 +52,7 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 **To use data disk, please follow these steps**
 1. create a folder in the data disk by `mkdir /data/yourusername`
 2. create a data folder in the user's home directory by `mkdir ~/my_project_data`, and link this folder with the data disk one by `ln -s /data/yourusername/my_project_data ~/my_project_data`
+3. **Please change data/grads/out folder path in each bash script to where you store those info**
 
 ## How to Run the New Pipeline
 
@@ -85,6 +86,10 @@ Projected Gradient Vector Dimension = 4096, defined in [fake_val_grad.sh](filter
 - [ ] Better gradient level classifier / influence score predictor. Try more training epochs / data and so on. 
 
 - [ ] Reproduce LESS experiment results. To load model and all datasets into our total GPU memory of ~ 50GB, model quantization *(In `less/train/train.py`, around lines 75-76, when creating the model, add a parameter  `load_in_8bit=True`)* and gradient checkpointing may need to be enabled *(In `less/scripts/train/base_training_args.sh`, simply add another parameter `--gradient_checkpointing`. The library version of Accelerate may need to be over 0.28.0, but other functions, like loading data or distributed training can be affected.)*
+
+- [ ] Add classifier / regression model evaluation metrics. For example, the overlap rate between data actually (gradient computation) and presumably (classifier / regression model predictions) leading to high influence scores in target tasks. 
+
+- [ ] Obtain the trade-off between gradient computation time in the whole data selection pool and fine-tuning accuracy.  
 
 ## LESS Pipeline
 
