@@ -60,12 +60,13 @@ We follow the [open-instruct](https://github.com/allenai/open-instruct?tab=readm
 2. use [warm_up.sh](warm_up.sh) to obtain checkpoints of LORA training on part of the data selection pool.
 3. run [fake_val_grad.sh](filter/scripts/fake_val_grad.sh) to calculate adam gradidents of sampled training points `sampled_val_dolly_data.jsonl`, and [val_grad.sh](val_grad.sh) to get SGD gradients of reference points. The reason to sample training points is only for testing the code and speed up code updates. 
 4. use [data_generation.ipynb](filter/data_generation.ipynb) to obtain influence scores of training points and label data for classification tasks. 
-5. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
-6. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. 
+5. built classifier or regression models in [text_classification.ipynb](filter/text_classification.ipynb) or [filter/text_regression.ipynb](filter/text_regression.ipynb). When building models, the trainining points are split into three subsets for training, validating and testing models. 
+6. use [run_filter.ipynb](filter/run_filter.ipynb) to apply classifier or regression models to predict gradient levels or influence scores of the data selection pool.  
+7. after applying the classifier, run [train_grad.sh](filter/scripts/train_grad.sh) to get actual adam gradients of selection candidates classified as high-gradient levels. Then, use [inf_score.sh](filter/scripts/inf_score.sh) and [top_influence.sh](filter/scripts/top_influence.sh) to get influence scores of selected points. 
   
     However, there's no need to run these steps if the regression model is used to get promising data selection candidates. 
 
-7. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
+8. run [tune.sh](filter/scripts/tune.sh) to fine-tune a language model and test the model with [raw_eval.sh](evaluation/raw_eval.sh) after modifying parameters there. 
 
 ## Current Results
 
